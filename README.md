@@ -1,2 +1,21 @@
 JobManager
 ==========
+
+The JobManager is a multiple process methodology for keeping track of the number of jobs being run, starting jobs, and fetching any results from jobs. The framework is built up of three classes: a JobManager, a JobStarter, and a ResultFetcher. Interprocess communication occurs via Redis objects (specifically queues, sets, and ordered sets).
+
+The JobManager class "watches" some input queue which we have called 'Job\_Queue' for yaml files which define the Job (including which Job class to use). Once a job is queued, the Manager has two objects it uses (a set called 'LocalJobs' and 'RemoteJobs')to track the number of jobs being used. The number of EC2 instances is done via polling EC2, instead of tracking the number locally via a redis object. The JobManager uses multi-queue blocking object which allows us to change which queues the JobManager is looking at throughout execution (i.e. if we have two many jobs running on a remote machine, then don't launch anymore on that machine). Once a job has been adequately notated in the management objects, if there is room to run another job, then the job is sent to the 'Granted\_Queue'.
+
+The JobStarter class is simply looking for Jobs which have been "granted" by the JobManager. The JobStarter is meant to be agnostic of what the job is and where it is running. The class blocks on the 'Granted\_Queue' and simply uses a key in the yaml called 'ClassType' to choice which Job class to use in declaring this new job. After which the 'runJob()' function is called to start the new process containing the job (be it local or remote).
+
+The ResultFetcher class is polling jobs to figure out if they are ready (sitting in the 'Running\_Queue' which is actually an ordered set). The reason we originally chose to poll jobs is that we did not want EC2 starting conversations with us but we may want to rethink about this regarding non-EC2 jobs (Our first pass at this was CloudManager which only handled cloud data). Part of the beauty to this framework is that individual processes can be rethought very easily and with little thought about what the other processes are doing. For this reason, we originally used hard waits and sequential polling but we have already revised the ResultFetcher to use an ordered set in redis, such that we can now deal better with jobs polling at different frequencies. The only requirement is that each job class has a 'isFinished()' function that returns true when the thread or remote process has finished. In addition 'getReturnData' is tried but will pass if it doesn't exist (this was a quick hack to deal with the fact that local jobs have no return results currently). Before we switched to ordered sets, this object used blocking but we have not find a way to block on an ordered set and so we use hard waits to ping the order set for jobs past a certain time.
+
+Job Classes
+-----------
+
+A job is either a thread that is either local or remote and this thread is doing some kind of workflow process. The classes provide a way to log the output of these process and then a high-level information about what steps have been completed in the workflow. It maybe necessary to add more Job classes at a later point (or to handle other types of systems) but for now the following three classes are all we have needed.
+
+Job:  Job.py - This is a local job which will be run on the same machine as the JobManager. To achieve this the Job class is actually wrapped in a JobThread class which uses 'Popen()' to create a thread with the job.
+
+RemoteJob:  RemoteJob.py - This uses the RemoteConnection class (paramiko) to connect to remote instances and achieve the same functionality as Job.py except now on a remote machine. In fact, a RemoteJob wraps the function calls of Job.py so that they can be called via ssh connection (i.e. 'runJob()' of a RemoteJob actually uploads the Job class on a remote machine).
+
+EC2Job - Unlike the other cases, we decided to not treat EC2Job's as distinct class and rather a hack of the RemoteJob. For this reason, we could branch JobManager and have a manager that doesn't think about Amazon's EC2 cloud at all and then we have our current JobManager which does have EC2 functionality. An example of an EC2Job can be found  here
