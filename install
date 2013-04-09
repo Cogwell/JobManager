@@ -1,0 +1,3 @@
+# install ssh
+sudo apt-get install python-yaml
+sudo apt-get install python-paramiko

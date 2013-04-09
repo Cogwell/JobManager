@@ -1,0 +1,31 @@
+ClassType: Local
+Filename: /home/d3y034/chembio_svn/JobManager/examples/Job/job.yaml
+Modules:
+  first: somecode.py
+  second: morecode.py
+Order:
+- Function: printHelloWorld
+  Module: first
+- Function: mangleSomeInput
+  Inputs:
+  - var: kitty
+  - arr:
+    - 1
+    - goat
+    - ate
+    - all
+    - the
+    - grass
+  Module: second
+  Outputs:
+  - str
+  - l
+- Function: getSomeMangledInput
+  Inputs:
+  - str: null
+  - l: null
+  Module: second
+- Function: sendDict
+  Inputs:
+  - yaml: self.yaml
+  Module: second

@@ -1,0 +1,18 @@
+Job YAML Definition:
+Requires two root keys: 'Modules' and 'Order'. Modules defines the path to a piece of python code. The Order key then outlines the sequence of function calls, their related i/o and gives a few more options.
+
+Modules Section (dict):
+This section should be 'key: val' where the key is the identifier you want to assign to a module and the val is a relative path to the code.
+
+Order Section (list of dict):
+This section is a list requires the 'Function' and 'Modules' keys for each dictionary entry. 'Inputs', 'Outputs', 'Declares', and 'Log' are all option keys. Function refers to the function being called (without parens). Module refers to the key associated with a piece of python code which houses our desired function. Inputs and Outputs are lists of variables (just the name). Delcares is used to initalize any of the variables. Log refers to a relative path of a log file for the given output of the function (this log file is only for that section of code). 
+
+
+
+RemoteConnection YAML Defintion (dict):
+Requires two keys: 'Username' and 'Hostname'. 'Port', 'Key', and 'onDemand' are optional keys. All these fields have the same meaning as in a general ssh connection except onDemand is used to determine if the current RemoteConnection will persist or not.
+
+
+
+RemoteJob YAML definition:
+This yaml file is a merge of the Job and RemoteConnection yamls. In addition, the following keys are required: 'LocalWorkingDir' and 'RemoteWorkingDir'. 'LocalOutputDir' and 'RemoteOutputDir' are optional fields.

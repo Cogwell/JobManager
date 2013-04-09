@@ -1,0 +1,13 @@
+ClassType: Remote
+Filename: /home/d3y034/chembio_svn/JobManager/examples/RemoteJob/remoteJob.yaml
+Hostname: wd74401
+Key: ~/.ssh/id_rsa
+Modules:
+  code: examplecode.py
+Order:
+- Function: waiter
+  Module: code
+- Function: printer
+  Module: code
+RemoteWorkingDir: ~/testing
+Username: d3y034

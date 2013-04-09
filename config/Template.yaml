@@ -1,0 +1,19 @@
+awsIDs:
+- AWS Access ID [Protect this]
+- AWS Secret Access Key [Protect this]
+
+regionName: us-east-1
+
+ec2MaxInstances: 18
+InstPollPeriod: 15 # in seconds
+
+LocalMaxJobs: 3
+
+RemoteMaxJobsPerHost: 3
+
+amiID: ami-#
+instanceSize: m1.large
+securityGroups:
+- [List of security groups goes here]
+sshKeyName: [name of the key pair used to connect to ec2]
+PollPeriod: 1 # in minutes
